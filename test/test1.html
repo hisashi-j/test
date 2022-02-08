@@ -1,0 +1,70 @@
+<html>
+  <head>
+    <meta charset="utf-8">
+  </head>
+  <body>
+    <button id="play_stop_btn">play/stop</button>
+    <svg>
+      const svgHeight = 120;
+      const svgWidth = 640;
+      <polyline></polyline>
+    </svg>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+      const audioContext = new AudioContext();
+      const oscillatorNode = audioContext.createOscillator();
+      const analyzerNode = audioContext.createAnalyser();
+      oscillatorNode.connect(audioContext.destination);
+      oscillatorNode.start();
+
+
+document.getElementById('play_stop_btn')
+  .addEventListener('click', function() {
+    if (audioContext.state === 'suspended') {
+      audioContext.resume();
+    } else {
+      audioContext.suspend();
+    }
+  }, false);
+
+      oscillatorNode.connect(analyzer);
+      analyzerNode.connect(audioContext.destination);
+      const bufferLength = analyzerNode.fftSize;
+      const dataArray = new Uint8Array(bufferLength);
+
+
+const svg = d3.select('svg')
+  .style('height', svgHeight)
+  .style('width', svgWidth);
+
+const polyline = svg.select('polyline');
+
+const scaleX = d3.scaleLinear()
+  .domain([0, bufferLength-1])
+  .range([0, svgWidth]);
+
+const scaleY = d3.scaleLinear()
+  .domain([0, 256])
+  .range([svgHeight, 0]);
+
+  function formatToCoord(d, i) {
+  return `${scaleX(i)},${scaleY(d)}`;
+}
+
+function draw() {
+  analyzerNode.getByteTimeDomainData(dataArray);
+  const data = Array.from(dataArray)
+                .map(formatToCoord)
+                .join(' ');
+  polyline.datum(data)
+    .attr('stroke', 'black')
+    .attr('fill', 'none')
+    .attr('points', (d) => d);
+}
+
+d3.timer(draw);
+
+
+    </script>
+  </body>
+</html>
